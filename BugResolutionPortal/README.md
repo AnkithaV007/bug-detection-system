@@ -5,9 +5,8 @@ A Bug Detection and Fixing System built with Django and SQLite.
 Testers report bugs, developers pick them up and record their debugging notes,
 and staff members assign work and track everything from a dashboard.
 
-The project also includes a React dashboard in `frontend/`. The backend keeps
-its existing Django structure and exposes authenticated JSON endpoints for the
-React app.
+The project keeps its existing Django structure and exposes authenticated JSON
+endpoints for dashboard and natural-language issue queries.
 
 ---
 
@@ -39,16 +38,8 @@ $env:DATABASE_URL = "postgresql://postgres:password@localhost:5432/bug_portal"
 Without `DATABASE_URL`, the project continues to use the included SQLite
 database for local development.
 
-### React frontend
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
 Set `OPENAI_API_KEY` to enable the read-only natural-language issue search.
-The key is used only by Django and must not be added to the React app.
+The key is used only by Django.
 
 > If PowerShell blocks `activate` with a script execution error, run
 > `Set-ExecutionPolicy -Scope Process -ExecutionPolicy RemoteSigned` once in the

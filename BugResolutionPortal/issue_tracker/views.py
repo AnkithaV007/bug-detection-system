@@ -43,7 +43,7 @@ def _issue_payload(issue):
 
 
 def dashboard_api(request):
-    """Return dashboard data for the React frontend."""
+    """Return dashboard data for authenticated integrations."""
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Authentication required."}, status=401)
 
