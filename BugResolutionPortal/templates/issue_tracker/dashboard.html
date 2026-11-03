@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard &middot; BugResolutionPortal{% endblock %}
+
+{% block content %}
+<div class="page__head">
+  <div>
+    <h1 class="page__title">Dashboard</h1>
+    <p class="page__subtitle">Hello {{ user.first_name|default:user.username }}, here is where the bugs stand today.</p>
+  </div>
+  <a href="{% url 'issue_tracker:issue_create' %}" class="btn btn--primary">Report an issue</a>
+</div>
+
+<section class="stats">
+  <a class="card stat stat--open" href="{% url 'issue_tracker:issue_list' %}?status=OPEN">
+    <span class="stat__label">Open</span>
+    <span class="stat__value">{{ open_count }}</span>
+    <span class="stat__note">Waiting to be picked up</span>
+  </a>
+  <a class="card stat stat--in-progress" href="{% url 'issue_tracker:issue_list' %}?status=IN_PROGRESS">
+    <span class="stat__label">In progress</span>
+    <span class="stat__value">{{ in_progress_count }}</span>
+    <span class="stat__note">Being fixed right now</span>
+  </a>
+  <a class="card stat stat--resolved" href="{% url 'issue_tracker:issue_list' %}?status=RESOLVED">
+    <span class="stat__label">Resolved</span>
+    <span class="stat__value">{{ resolved_count }}</span>
+    <span class="stat__note">Fixed, ready to verify</span>
+  </a>
+  <a class="card stat stat--critical" href="{% url 'issue_tracker:issue_list' %}?priority=CRITICAL">
+    <span class="stat__label">Critical</span>
+    <span class="stat__value">{{ critical_count }}</span>
+    <span class="stat__note">Needs attention first</span>
+  </a>
+</section>
+
+<div class="grid grid--2">
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">Latest reports</h2>
+      <a href="{% url 'issue_tracker:issue_list' %}" class="card__link">View all {{ total_count }}</a>
+    </div>
+
+    {% if recent_issues %}
+      <ul class="list">
+        {% for issue in recent_issues %}
+          <li class="list__row">
+            <a href="{{ issue.get_absolute_url }}" class="list__main">
+              <span class="list__ref">{{ issue.issue_id }}</span>
+              <span class="list__title">{{ issue.title }}</span>
+            </a>
+            <span class="list__meta">
+              <span class="badge {{ issue.priority_css_class }}">{{ issue.get_priority_display }}</span>
+              <span class="badge {{ issue.status_css_class }}">{{ issue.get_status_display }}</span>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">No bugs have been reported yet. Report the first one to get started.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <div class="card__head">
+      <h2 class="card__title">Assigned to you</h2>
+    </div>
+
+    {% if my_issues %}
+      <ul class="list">
+        {% for issue in my_issues %}
+          <li class="list__row">
+            <a href="{{ issue.get_absolute_url }}" class="list__main">
+              <span class="list__ref">{{ issue.issue_id }}</span>
+              <span class="list__title">{{ issue.title }}</span>
+            </a>
+            <span class="list__meta">
+              <span class="badge {{ issue.status_css_class }}">{{ issue.get_status_display }}</span>
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="empty">Nothing is assigned to you right now.</p>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

@@ -1,0 +1,66 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BugResolutionPortal{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body>
+
+{% if user.is_authenticated %}
+<header class="navbar">
+  <div class="navbar__inner">
+    <a class="navbar__brand" href="{% url 'issue_tracker:dashboard' %}">
+      <span class="navbar__mark">BR</span>
+      BugResolutionPortal
+    </a>
+
+    <input type="checkbox" id="nav-toggle" class="navbar__checkbox">
+    <label for="nav-toggle" class="navbar__burger" aria-label="Show menu">
+      <span></span><span></span><span></span>
+    </label>
+
+    <nav class="navbar__menu">
+      <a href="{% url 'issue_tracker:dashboard' %}"
+         class="navbar__link {% if request.resolver_match.url_name == 'dashboard' %}is-active{% endif %}">Dashboard</a>
+      <a href="{% url 'issue_tracker:issue_list' %}"
+         class="navbar__link {% if request.resolver_match.url_name == 'issue_list' %}is-active{% endif %}">All issues</a>
+      <a href="{% url 'issue_tracker:issue_create' %}"
+         class="navbar__link {% if request.resolver_match.url_name == 'issue_create' %}is-active{% endif %}">Report issue</a>
+      {% if user.is_staff %}
+        <a href="{% url 'admin:index' %}" class="navbar__link">Admin</a>
+      {% endif %}
+
+      <span class="navbar__user">
+        {{ user.username }}{% if user.is_staff %} <span class="navbar__tag">staff</span>{% endif %}
+      </span>
+
+      <form action="{% url 'logout' %}" method="post" class="navbar__logout">
+        {% csrf_token %}
+        <button type="submit" class="btn btn--ghost">Sign out</button>
+      </form>
+    </nav>
+  </div>
+</header>
+{% endif %}
+
+<main class="page">
+  {% if messages %}
+    <div class="messages">
+      {% for message in messages %}
+        <div class="message message--{{ message.tags|default:'info' }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+  {% endif %}
+
+  {% block content %}{% endblock %}
+</main>
+
+<footer class="footer">
+  BugResolutionPortal &middot; Bug detection and fixing system built with Django
+</footer>
+
+</body>
+</html>

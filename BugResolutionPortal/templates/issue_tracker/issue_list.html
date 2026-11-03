@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}All issues &middot; BugResolutionPortal{% endblock %}
+
+{% block content %}
+<div class="page__head">
+  <div>
+    <h1 class="page__title">All issues</h1>
+    <p class="page__subtitle">{{ issues|length }} issue{{ issues|length|pluralize }} match your filters.</p>
+  </div>
+  <a href="{% url 'issue_tracker:issue_create' %}" class="btn btn--primary">Report an issue</a>
+</div>
+
+<form method="get" class="card filters">
+  <div class="field field--grow">
+    <label for="q">Search</label>
+    <input type="search" id="q" name="q" value="{{ query }}"
+           placeholder="Title, description or BUG-0001">
+  </div>
+
+  <div class="field">
+    <label for="status">Status</label>
+    <select id="status" name="status">
+      <option value="">Any status</option>
+      {% for value, label in status_choices %}
+        <option value="{{ value }}" {% if value == selected_status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="field">
+    <label for="priority">Priority</label>
+    <select id="priority" name="priority">
+      <option value="">Any priority</option>
+      {% for value, label in priority_choices %}
+        <option value="{{ value }}" {% if value == selected_priority %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="filters__actions">
+    <button type="submit" class="btn btn--primary">Apply</button>
+    <a href="{% url 'issue_tracker:issue_list' %}" class="btn btn--ghost">Clear</a>
+  </div>
+</form>
+
+<section class="card card--flush">
+  {% if issues %}
+    <div class="table-wrap">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Issue</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Status</th>
+            <th>Reported by</th>
+            <th>Assigned to</th>
+            <th>Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for issue in issues %}
+            <tr>
+              <td class="table__ref">{{ issue.issue_id }}</td>
+              <td><a href="{{ issue.get_absolute_url }}" class="table__link">{{ issue.title }}</a></td>
+              <td><span class="badge {{ issue.priority_css_class }}">{{ issue.get_priority_display }}</span></td>
+              <td><span class="badge {{ issue.status_css_class }}">{{ issue.get_status_display }}</span></td>
+              <td>{{ issue.reporter.username }}</td>
+              <td>{{ issue.assigned_to.username|default:"Unassigned" }}</td>
+              <td class="table__date">{{ issue.updated_at|date:"d M Y, H:i" }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="empty">No issues match that search. Clear the filters to see everything.</p>
+  {% endif %}
+</section>
+{% endblock %}

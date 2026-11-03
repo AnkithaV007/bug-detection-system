@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}{{ issue.issue_id }} &middot; BugResolutionPortal{% endblock %}
+
+{% block content %}
+<div class="page__head">
+  <div>
+    <p class="page__eyebrow">{{ issue.issue_id }}</p>
+    <h1 class="page__title">{{ issue.title }}</h1>
+    <p class="page__subtitle">
+      Reported by {{ issue.reporter.username }} on {{ issue.created_at|date:"d M Y, H:i" }}
+    </p>
+  </div>
+  <a href="{% url 'issue_tracker:issue_list' %}" class="btn btn--ghost">Back to all issues</a>
+</div>
+
+<div class="grid grid--detail">
+  <div class="stack">
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">Description</h2>
+        <span class="card__badges">
+          <span class="badge {{ issue.priority_css_class }}">{{ issue.get_priority_display }}</span>
+          <span class="badge {{ issue.status_css_class }}">{{ issue.get_status_display }}</span>
+        </span>
+      </div>
+      <p class="prose">{{ issue.description|linebreaksbr }}</p>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">Steps to reproduce</h2>
+      </div>
+      {% if issue.steps_to_reproduce %}
+        <p class="prose prose--steps">{{ issue.steps_to_reproduce|linebreaksbr }}</p>
+      {% else %}
+        <p class="empty">No steps were provided with this report.</p>
+      {% endif %}
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">Comments and fix notes</h2>
+        <span class="card__link">{{ comments|length }} note{{ comments|length|pluralize }}</span>
+      </div>
+
+      {% if comments %}
+        <ul class="comments">
+          {% for comment in comments %}
+            <li class="comment">
+              <div class="comment__avatar">{{ comment.author.username|first|upper }}</div>
+              <div class="comment__body">
+                <p class="comment__meta">
+                  <strong>{{ comment.author.username }}</strong>
+                  <span>{{ comment.created_at|date:"d M Y, H:i" }}</span>
+                </p>
+                <p class="prose">{{ comment.body|linebreaksbr }}</p>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="empty">No notes yet. Add what you found while debugging.</p>
+      {% endif %}
+
+      <form method="post" action="{% url 'issue_tracker:comment_create' issue.pk %}" class="form form--inline-comment">
+        {% csrf_token %}
+        {{ comment_form.body }}
+        <button type="submit" class="btn btn--primary">Post note</button>
+      </form>
+    </section>
+  </div>
+
+  <aside class="stack">
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">Details</h2>
+      </div>
+      <dl class="details">
+        <dt>Status</dt>
+        <dd><span class="badge {{ issue.status_css_class }}">{{ issue.get_status_display }}</span></dd>
+        <dt>Priority</dt>
+        <dd><span class="badge {{ issue.priority_css_class }}">{{ issue.get_priority_display }}</span></dd>
+        <dt>Reporter</dt>
+        <dd>{{ issue.reporter.username }}</dd>
+        <dt>Assigned developer</dt>
+        <dd>{{ issue.assigned_to.username|default:"Unassigned" }}</dd>
+        <dt>Created</dt>
+        <dd>{{ issue.created_at|date:"d M Y, H:i" }}</dd>
+        <dt>Last updated</dt>
+        <dd>{{ issue.updated_at|date:"d M Y, H:i" }}</dd>
+      </dl>
+    </section>
+
+    <section class="card">
+      <div class="card__head">
+        <h2 class="card__title">Update status</h2>
+      </div>
+      <form method="post" action="{% url 'issue_tracker:issue_update_status' issue.pk %}" class="form">
+        {% csrf_token %}
+        <div class="field">
+          {{ status_form.status }}
+        </div>
+        <button type="submit" class="btn btn--primary btn--block">Save status</button>
+      </form>
+    </section>
+
+    {% if user.is_staff %}
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">Assign developer</h2>
+        </div>
+        <form method="post" action="{% url 'issue_tracker:issue_assign' issue.pk %}" class="form">
+          {% csrf_token %}
+          <div class="field">
+            {{ assign_form.assigned_to }}
+          </div>
+          <button type="submit" class="btn btn--primary btn--block">Save assignment</button>
+        </form>
+      </section>
+    {% else %}
+      <section class="card">
+        <div class="card__head">
+          <h2 class="card__title">Assign developer</h2>
+        </div>
+        <p class="empty">Only staff members can change who is working on a bug.</p>
+      </section>
+    {% endif %}
+  </aside>
+</div>
+{% endblock %}
